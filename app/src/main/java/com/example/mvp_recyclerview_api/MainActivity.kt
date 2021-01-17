@@ -19,15 +19,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         val textView: TextView = findViewById(R.id.textView)
-        textView.text = fetchAllUserData().toString();
-
+//        recyclerView.adapter = fetchAllUserData()
+        textView.text = fetchAllUserData().toString()
     }
 
     //繋ぎこみ
-    fun createService(): QiitaApiInterface {
+    private fun createService(): QiitaApiInterface {
         val client = httpBuilder.build()
         val retrofit = Retrofit.Builder()
                 .baseUrl("https://qiita.com/")//基本のurl設定
@@ -38,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         return retrofit.create(QiitaApiInterface::class.java)
     }
 
-    val httpBuilder: OkHttpClient.Builder get() {
+    val httpBuilder: OkHttpClient.Builder get() { //代入ではなく単に参照している
         //httpClinetのBuilderを作る
         val httpClient = OkHttpClient.Builder()
         //create http client　headerの追加
@@ -64,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     //データリストに保存し、そのデータの取得
-    fun fetchAllUserData(): List<Model> {
+    private fun fetchAllUserData(): List<Model> {
 
         val dataList = mutableListOf<Model>()
         //リクエストURl作成してデータとる パラメータの引数の設定も行う
@@ -76,6 +75,7 @@ class MainActivity : AppCompatActivity() {
 
                 //ステータスコードが200：OKなので、ここではちゃんと通信できたよ
                 if (response.isSuccessful) {
+                    Log.d("success", response.isSuccessful.toString())
                     response.body()?.let {
                         for (item in it) {
                             val data: Model = Model().also {
@@ -86,11 +86,13 @@ class MainActivity : AppCompatActivity() {
                             }
                             //取得したデータをModelに追加
                             dataList.add(data)
+                            Log.d("data", dataList.toString())
                         }
                         //今回recyclerViewを利用しているが、これを書かないと先に画面の処理が終えてしまうので表示されなくなります。
 //                            Retrofit.recyclerView.adapter?.notifyDataSetChanged()
                     }!!
                 } else {
+                    Log.d("fail", response.isSuccessful.toString())
                 }
             }
 
